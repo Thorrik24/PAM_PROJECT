@@ -1,0 +1,6 @@
+<form method="post">
+  {{ message }}<br><br>
+  {% csrf_token %}
+  {{ form }}
+  <input type="submit"></input>
+</form>

@@ -1,0 +1,52 @@
+<a><strong>----------------------Pokemons------------------</strong></a> <br>
+<br>
+{% for registro in object_list %}
+    
+    {% if registro.Tipo == 'Pokemon' %}
+
+    <a><strong>-{{ registro.Nombre }}</strong></a>
+    <a href={% url "pam:DPoke" registro.id %}>Eliminar</a> <br>
+    <br>
+
+    {% endif %} 
+
+{% endfor %}
+
+<a><strong>---------------------Ataques--------------------</strong></a>  <br>
+<br>
+
+{% for registro in object_list %}
+    {% if registro.Tipo == 'Ataque' %}
+
+    <a><strong>-{{ registro.Nombre }}</strong></a>
+    <a href={% url "pam:DAta" registro.id %}>Eliminar</a> <br>
+    <br>
+
+    {% endif %} 
+
+{% endfor %}
+<a><strong>-------------------Equipos----------------------</strong></a>  <br>
+<br>
+
+{% for registro in object_list %}
+
+    {% if registro.Tipo == 'Equipo' %} 
+    <a><strong>-{{ registro.Nombre }}</strong></a>
+    <a href={% url "pam:DEqui" registro.id %}>Eliminar</a>  <br>
+    <br>
+    {% endif %}
+
+{% endfor %}    
+<a><strong>----------------------Objetos-------------------</strong></a>  <br>
+<br>
+
+{% for registro in object_list %}
+
+    {% if registro.Tipo == 'Hechizo' %}
+
+    <a><strong>-{{ registro.Nombre }}</strong></a> 
+    <a href={% url "pam:DHechi" registro.id %}>Eliminar</a>
+    <br>
+    {% endif %}
+
+{% endfor %}

@@ -1,0 +1,20 @@
+{% for baraja in object_list %}
+<form
+  action="{% url 'pam:AñaBara' %}"
+  method="get"
+>
+  {{ baraja }}
+  <input
+    name='q'
+    type="hidden"
+    name="text"
+    value="{{ baraja.id }}"
+  >
+  <input
+    type='submit'
+    value='Añadir Carta'
+  ></input>
+  <br>
+</form>
+
+{% endfor %}
