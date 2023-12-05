@@ -22,7 +22,7 @@ class SingUpForm(UserCreationForm):
 #     objeto = forms.MultipleChoiceField(choices=CHOICES,label='Carta',widget=forms.CheckboxSelectMultiple)
 
 class BarajaForm(forms.Form):
-  Nombre = forms.CharField( max_length=100, required=True)
-  Descripcion = forms.CharField(max_length=100, required=True)
+  nombre = forms.CharField( max_length=100, required=True)
+  descripcion = forms.CharField(max_length=100, required=True)
 
 # class AñadirCartas(forms.Form):

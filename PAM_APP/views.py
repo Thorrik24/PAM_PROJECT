@@ -31,18 +31,6 @@ class ListadoCartas(ListView):
     template_name = "CRUD/listar.html"
     model = Carta
 
-#DETAIL
-
-class DetailPokemon(DetailView):
-    template_name = 'CRUD/detail.html'
-    queryset=Pokemon.objects.all()
-
-#UPDATE
-
-class UpdatePokemon(UpdateView):
-    template_name = 'CRUD/crear.html'
-    model = Pokemon
-    fields = '__all__'
 #CREATE VIEWS
 class CreateUsuario(CreateView):
     template_name="CRUD/crear.html"
@@ -52,24 +40,25 @@ class CreateUsuario(CreateView):
 class CreatePokemon(CreateView):
     template_name = "CRUD/crear.html"
     model = Pokemon
-    fields = ["Nombre","Descripcion","Coste","Etapa","tipo_1","tipo_2"]
+    fields = ["nombre","descripcion","coste","etapa","tipo_1","tipo_2"]
 
     def post(self,request,*args,**kwargs):
         form = request.POST
         try:
-            nombre = request.POST["Nombre"]
-            descripcion = request.POST["Descripcion"]
-            coste = request.POST["Coste"]
-            etapa = request.POST["Etapa"]
-            tipo_1 = request.POST["tipo_1"]
-            tipo_2 = request.POST["tipo_2"]
-            tipo = "Pokemon"
+            nombre_p = request.POST["nombre"]
+            descripcion_p = request.POST["descripcion"]
+            coste_p = request.POST["coste"]
+            etapa_p = request.POST["etapa"]
+            tipo_1_p = request.POST["tipo_1"]
+            tipo_2_p = request.POST["tipo_2"]
+            tipo_p = "Pokemon"
 
-            Pokemon.objects.create(Nombre=nombre,Descripcion=descripcion,
-                                    Coste=coste, Etapa=etapa, Tipo=tipo,
-                                    tipo_1=tipo_1, tipo_2=tipo_2
+            Pokemon.objects.create(nombre=nombre_p ,Descripcion=descripcion_p,
+                                    Coste=coste_p, Etapa=etapa_p, tipo=tipo_p,
+                                    tipo_1=tipo_1_p, tipo_2=tipo_2_p
                                     )
         except:
+            #gestion de errores
             print("ERROR: No ha sido posible crear el registro.")
 
         return HttpResponseRedirect(reverse_lazy("pam:Cartas"))
@@ -77,19 +66,19 @@ class CreatePokemon(CreateView):
 class CreateEquipo(CreateView):
     template_name = "CRUD/crear.html"
     model = Equipo
-    fields = ["Nombre","Descripcion","Coste","TipoEquipo"]
+    fields = ["nombre","descripcion","coste","tipo_equipo"]
 
     def post(self,request,*args,**kwargs):
         form = request.POST
         try:
-            nombre = request.POST["Nombre"]
-            descripcion = request.POST["Descripcion"]
-            coste = request.POST["Coste"]
-            Tipo_Equipo = request.POST["TipoEquipo"]
-            tipo = "Equipo"
+            nombre_eq = request.POST["nombre"]
+            descripcion_eq = request.POST["descripcion"]
+            coste_eq = request.POST["coste"]
+            tipo_equipo_eq = request.POST["tipo_equipo"]
+            tipo_eq = "Equipo"
 
-            Equipo.objects.create(Nombre=nombre, Descripcion=descripcion, 
-                                  Coste=coste, TipoEquipo=Tipo_Equipo, Tipo=tipo
+            Equipo.objects.create(nombre=nombre_eq, descripcion=descripcion_eq, 
+                                  coste=coste_eq, tipo_equipo=tipo_equipo_eq, tipo=tipo_eq
                                   )
 
         except:
@@ -100,19 +89,19 @@ class CreateEquipo(CreateView):
 class CreateAtaque(CreateView):
     template_name = "CRUD/crear.html"
     model = Ataque
-    fields = ["Nombre","Descripcion","Coste","CaraAtaque"]
+    fields = ["nombre","descripcion","coste","cara_ataque"]
 
     def post(self,request,*args,**kwargs):
         form = request.POST
         try:
-            nombre = request.POST["Nombre"]
-            descripcion = request.POST["Descripcion"]
-            coste = request.POST["Coste"]
-            cara_ataque = request.POST["CaraAtaque"]
-            tipo = "Ataque"
+            nombre_at = request.POST["nombre"]
+            descripcion_at = request.POST["descripcion"]
+            coste_at = request.POST["coste"]
+            cara_ataque_at = request.POST["cara_ataque"]
+            tipo_at = "Ataque"
 
-            Ataque.objects.create(Nombre=nombre, Descripcion=descripcion, 
-                                  Coste=coste, CaraAtaque=cara_ataque, Tipo=tipo
+            Ataque.objects.create(nombre=nombre_at, descripcion=descripcion_at, 
+                                  coste=coste_at, cara_ataque=cara_ataque_at, tipo=tipo_at
                                   )
 
         except:
@@ -120,22 +109,22 @@ class CreateAtaque(CreateView):
 
         return HttpResponseRedirect(reverse_lazy("pam:Cartas"))
 
-class CreateHechizo(CreateView):
+class CreateApoyo(CreateView):
     template_name = "CRUD/crear.html"
-    model = Hechizo
-    fields = ["Nombre","Descripcion","Coste","TipoHechizo"]
+    model = Apoyo
+    fields = ["nombre","descripcion","coste","tipo_apoyo"]
 
     def post(self,request,*args,**kwargs):
         form = request.POST
         try:
-            nombre = request.POST["Nombre"]
-            descripcion = request.POST["Descripcion"]
-            coste = request.POST["Coste"]
-            rango_carta = request.POST["TipoHechizo"]
-            tipo = "Hechizo"
+            nombre_ap = request.POST["nombre"]
+            descripcion_ap = request.POST["descripcion"]
+            coste_ap = request.POST["coste"]
+            tipo_apoyo_ap = request.POST["tipo_apoyo"]
+            tipo_ap = "Apoyo"
 
-            Pokemon.objects.create(Nombre=nombre,Descripcion=descripcion,
-                                    Coste=coste, TipoHechizo=rango_carta, Tipo=tipo
+            Pokemon.objects.create(Nombre=nombre_ap,Descripcion=descripcion_ap,
+                                    coste=coste_ap, tipo_apoyo=tipo_apoyo_ap, tipo=tipo_ap
                                     )
         except:
             print("ERROR: No ha sido posible crear el registro.")
@@ -223,9 +212,9 @@ class DeleteEquipo(DeleteView):
     model = Equipo
     success_url = reverse_lazy("pam:Cartas")
 
-class DeleteHechizo(DeleteView):
+class DeleteApoyo(DeleteView):
     template_name = "CRUD/eliminar.html"
-    model = Hechizo
+    model = Apoyo
     success_url = reverse_lazy("pam:Cartas")
 
 #LIST VIEWS
@@ -253,12 +242,12 @@ class ListadoEquipo(TemplateView):
         context["object_list"] = Equipo.objects.all()
         return context
     
-class ListadoHechizo(TemplateView):
+class ListadoApoyo(TemplateView):
     template_name="CRUD/listar.html"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["object_list"] = Hechizo.objects.all()
+        context["object_list"] = Apoyo.objects.all()
         return context
 
 class ListadoBaraja(TemplateView):
@@ -278,6 +267,43 @@ class DetailBaraja(DetailView):
         context["registros"] = Registro.objects.filter(Baraja=Baraja.objects.get(id=self.request.META["PATH_INFO"].split("/")[-1]))
         return context
     
-        
-        
-    
+#UPDATE VIEWS
+
+class UpdatePokemon(UpdateView):
+    template_name = 'CRUD/crear.html'
+    model = Pokemon
+    fields = '__all__'
+
+class UpdateEquipo(UpdateView):
+    template_name = 'CRUD/crear.html'
+    model = Equipo
+    fields = '__all__'
+
+class UpdateAtaque(UpdateView):
+    template_name = 'CRUD/crear.html'
+    model = Ataque
+    fields = '__all__'
+
+class UpdateApoyo(UpdateView):
+    template_name = 'CRUD/crear.html'
+    model = Apoyo
+    fields = '__all__'
+
+
+#DETAIL
+
+class DetailPokemon(DetailView):
+    template_name = 'details/pokemon.html'
+    queryset=Pokemon.objects.all()
+
+class DetailAtaque(DetailView):
+    template_name = 'details/ataque.html'
+    queryset=Ataque.objects.all()
+
+class DetailEquipo(DetailView):
+    template_name = 'details/equipo.html'
+    queryset=Equipo.objects.all()
+
+class DetailApoyo(DetailView):
+    template_name = 'details/apoyo.html'
+    queryset=Apoyo.objects.all()
