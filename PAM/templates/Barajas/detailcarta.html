@@ -1,0 +1,8 @@
+
+<strong>Nombre: </strong>{{ object.nombre }}<br>
+<strong>Descripción: </strong>{{ object.descripcion }} <br>
+<strong>Tipo 1: </strong>{{ object.get_primer_tipo_display }}
+{% if object.segundo_tipo %} <strong>Tipo 2: </strong>{{ object.get_segundo_tipo_display }}
+{% endif %} 
+
+<strong>Coste: </strong>{{ object.coste }}<br>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %} Eliminar Cartas {% endblock %}
+{% block content %}
+<section class="inicio text-center page-section portfolio" id="portfolio">
+  <div class="container">
+    <!-- Portfolio Section Heading-->
+    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">BARAJAS</h2>
+    <!-- Icon Divider-->
+    <div class="divider-custom">
+        <div class="divider-custom-line"></div>
+        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+        <div class="divider-custom-line"></div>
+    </div>
+    <!-- Portfolio Grid Items-->
+    <div class="row justify-content-center">
+      {% for registro in object_list %}
+      <div style="display:flex; justify-content:center; padding-bottom:1rem;">
+      {% if registro.equipo and registro.ataque %}
+        <b>Carta</b>: [{{ registro.carta }}]&nbsp <b>Equipo</b>: [{{ registro.equipo }}]&nbsp <b>Ataque</b>: [{{ registro.ataque }}]&nbsp&nbsp
+      {% elif not registro.ataque %}
+      <b>Carta</b>: [{{ registro.carta }}]&nbsp <b>Equipo</b>: [{{ registro.equipo }}]&nbsp&nbsp
+      {% elif not registro.equipo %}
+      <b>Carta</b>: [{{ registro.carta }}]&nbsp <b>Ataque</b>: [{{ registro.ataque }}]&nbsp&nbsp
+      {% elif not registro.equipo and not registro.ataque %}
+        {{ registro.carta }}
+      {% endif %}
+      
+      <form method="post">
+        {% csrf_token %}
+        <input name='e' type="hidden" name="text" value="{{ registro.id }}" >
+        <input type='submit' value='Eliminar carta'></input>
+      </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
