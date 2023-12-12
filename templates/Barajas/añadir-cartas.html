@@ -1,6 +1,12 @@
+{% extends 'base.html' %}
+{% block title %} Añadir Cartas {% endblock %}
+{% block content %}
+<section class="inicio bg-primary text-white text-center">
 <form method="post">
   {{ message }}
   {% csrf_token %}
   {{ form.as_p }}
   <input type="submit"></input>
 </form>
+</section>
+{% endblock %}

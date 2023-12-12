@@ -4,6 +4,8 @@ from PAM_APP.views import *
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from PAM_APP.api import router
+
 
 urlpatterns = [
     path('', Index.as_view(), name="Index"),
@@ -13,6 +15,9 @@ urlpatterns = [
     path('cartas/ataque', ListadoAtaque.as_view(), name="LAtaque"),
     path('cartas/equipo', ListadoEquipo.as_view(), name="LEquipo"),
     path('cartas/apoyo', ListadoApoyo.as_view(), name="LApoyo"),
+    
+    #BUSQUEDA
+    path('pokemon/search', search.as_view(), name="BuscarPoke"),
 
     #BARAJAS
     path('baraja/', ListadoBaraja.as_view(), name="LBaraja"),
@@ -20,7 +25,9 @@ urlpatterns = [
     path('baraja/añadir', AñadirCartas.as_view(), name="AñaBara"),
     #DETALLADAS
     path('baraja/detail/<int:pk>', DetailBaraja.as_view(), name="DetailBaraja"),
-    
+    #DELETE
+    path('baraja/eliminar', DeleteCarta.as_view(), name="EliBaraC"),
+    path('delete/baraja/<int:pk>', DeleteBaraja.as_view(), name="DBara"),
     #CREAR
     path('register', CreateUsuario.as_view(), name="CUser"),
     path('create/pokemon', CreatePokemon.as_view(), name="CPoke"),
@@ -46,4 +53,4 @@ urlpatterns = [
     path('update/ataque/<int:pk>', UpdateAtaque.as_view(), name="UpAta"),
     path('update/apoyo/<int:pk>', UpdateApoyo.as_view(), name="UpApoyo"),
 ]
-]
+urlpatterns += router.urls

@@ -26,18 +26,32 @@ class CosteSuperado(Exception):
 
 class Index(TemplateView):
     template_name="index.html"
+class search(ListView):
+    model = Pokemon
+    template_name="Barajas/search.html"
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        object_list=Pokemon.objects.filter(Q(nombre__icontains=query))
+        return object_list
 
-class ListadoCartas(ListView):
+class ListadoCartas(TemplateView):
     template_name = "CRUD/listar.html"
-    model = Carta
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["pokemons"] = Pokemon.objects.all()
+        context["ataques"] = Ataque.objects.all()
+        context["apoyos"] = Apoyo.objects.all()
+        context["equipos"] = Equipo.objects.all()
+        return context
+    
 
 #CREATE VIEWS
 class CreateUsuario(CreateView):
-    template_name="CRUD/crear.html"
+    template_name="registration/login.html"
     model = Usuario
     form_class = SingUpForm
 
-class CreatePokemon(CreateView):
+class CreatePokemon(UserPassesTestMixin,CreateView):
     template_name = "CRUD/crear.html"
     model = Pokemon
     fields = ["nombre","descripcion","coste","etapa","tipo_1","tipo_2"]
@@ -62,8 +76,13 @@ class CreatePokemon(CreateView):
             print("ERROR: No ha sido posible crear el registro.")
 
         return HttpResponseRedirect(reverse_lazy("pam:Cartas"))
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
 
-class CreateEquipo(CreateView):
+class CreateEquipo(UserPassesTestMixin,CreateView):
     template_name = "CRUD/crear.html"
     model = Equipo
     fields = ["nombre","descripcion","coste","tipo_equipo"]
@@ -86,7 +105,12 @@ class CreateEquipo(CreateView):
 
         return HttpResponseRedirect(reverse_lazy("pam:Cartas"))
 
-class CreateAtaque(CreateView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class CreateAtaque(UserPassesTestMixin,CreateView):
     template_name = "CRUD/crear.html"
     model = Ataque
     fields = ["nombre","descripcion","coste","cara_ataque"]
@@ -108,8 +132,12 @@ class CreateAtaque(CreateView):
             print("ERROR: No ha sido posible crear el registro.")
 
         return HttpResponseRedirect(reverse_lazy("pam:Cartas"))
-
-class CreateApoyo(CreateView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class CreateApoyo(UserPassesTestMixin,CreateView):
     template_name = "CRUD/crear.html"
     model = Apoyo
     fields = ["nombre","descripcion","coste","tipo_apoyo"]
@@ -130,49 +158,59 @@ class CreateApoyo(CreateView):
             print("ERROR: No ha sido posible crear el registro.")
 
         return HttpResponseRedirect(reverse_lazy("pam:Cartas"))
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
 
-class CreateBarajas(CreateView):
+#VISTAS RELACIONADAS CON LAS BARAJAS Y USUARIO [CREARLAS, ELIMINARLAS, MODIFICARLAS]
+class CreateBarajas(UserPassesTestMixin,CreateView):
     model = Baraja
-    fields=["Nombre","Descripcion"]
+    fields=["nombre","descripcion"]
     template_name = 'Barajas/crear-baraja.html'
     success_url = reverse_lazy('pam:Index')
     def form_valid(self, form):
         try:
             self.object = form.save(commit=False)
-            self.object.Usuario = self.request.user
+            self.object.usuario = self.request.user
             self.object.save()
             return HttpResponseRedirect(reverse_lazy('pam:LBaraja'))
         except IntegrityError as e:
-            return render(self.request,'CRUD/crear-baraja.html', {"message":"ERROR: La baraja ya existe!!!","form":form})
-
-class AñadirCartas(CreateView):
+            return render(self.request,'Barajas/crear-baraja.html', {"message":"ERROR: La baraja ya existe!!!","form":form})
+            
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+        try:
+            return self.request.user.is_authenticated
+        except:
+            return False
+class AñadirCartas(UserPassesTestMixin,CreateView):
     model = Registro
     template_name = "Barajas/añadir-cartas.html"
-    fields = ['Carta','Equipo','Ataque']
+    fields = ['carta','equipo','ataque']
 
     def form_valid(self,form):
         try:
             self.object = form.save(commit=False)
-            self.object.Baraja = Baraja.objects.get(id=self.request.GET.get("q"))
-
+            self.object.baraja = Baraja.objects.get(id=self.request.GET.get("q"))
             try:
                 Bara = Baraja.objects.get(id=self.request.GET.get("q"))
-                coste_actual = Baraja.objects.get(id=self.request.GET.get("q")).Coste #OBTENER COSTE ACTUAL
-                
+                coste_actual = Baraja.objects.get(id=self.request.GET.get("q")).coste #OBTENER COSTE ACTUAL
+
                 
                 nuevo_coste = coste_actual 
 
                 #SUMAR COSTES
-                if self.object.Ataque:
-                    nuevo_coste += self.object.Ataque.Coste
-                if self.object.Equipo:
-                    nuevo_coste += self.object.Equipo.Coste
+                if self.object.ataque:
+                    nuevo_coste += self.object.ataque.coste
+                if self.object.equipo:
+                    nuevo_coste += self.object.equipo.coste
 
-                nuevo_coste +=  self.object.Carta.Coste
+                nuevo_coste +=  self.object.carta.coste
 
                 if nuevo_coste <= 20:
-                    Bara.Coste = nuevo_coste
-                    Bara.save()
+                    Bara.coste = nuevo_coste
+                    
                 else:
                     raise CosteSuperado
 
@@ -181,8 +219,9 @@ class AñadirCartas(CreateView):
                 return render(self.request,'Barajas/añadir-cartas.html', {"message":"ERROR: El coste de la baraja supera al permitido","form":form})
 
             try:
-                if self.object.Baraja.Usuario.id == self.request.user.id:
+                if self.object.baraja.usuario.id == self.request.user.id:
                     self.object.save()
+                    Bara.save()
                     return HttpResponseRedirect(reverse_lazy('pam:LBaraja'))
                 else:
                     raise PermissionError 
@@ -193,30 +232,115 @@ class AñadirCartas(CreateView):
         except IntegrityError as e:
             return render(self.request,'Barajas/añadir-cartas.html', {"message":"ERROR: Ese Pokemon ya se encuentra en la baraja","form":form})
         
- 
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+        try:
+            return Baraja.objects.get(id=self.request.GET.get("q")).usuario == self.request.user
+        except:
+            return False
+class DetailBaraja(UserPassesTestMixin,DetailView):
+    model = Baraja
+    template_name = "Barajas/DetailBaraja.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["registros"] = Registro.objects.filter(baraja=Baraja.objects.get(id=self.request.META["PATH_INFO"].split("/")[-1]))
+        return context
 
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+        try:
+            return Baraja.objects.get(id=self.request.META["PATH_INFO"].split("/")[-1]).usuario == self.request.user
+        except:
+            return False
+class DeleteCarta(UserPassesTestMixin,TemplateView):
+    template_name = "Barajas/ListarCartas.html"
+    model = Registro
+    success_url = reverse_lazy("pam:LBaraja")
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["object_list"] = Registro.objects.filter(baraja=Baraja.objects.get(id=self.request.GET.get("q")))
+        return context
+
+    def post(self, request):
+        if self.request.POST.get("e"):
+            carta = Registro.objects.get(id=int(self.request.POST.get("e")))
+            coste = carta.carta.coste
+            if carta.equipo:
+                coste += carta.equipo.coste
+            if carta.ataque:
+                coste += carta.ataque.coste
+            baraja = Baraja.objects.get(id=self.request.META["QUERY_STRING"].split("=")[-1])
+            baraja.coste -= coste
+            baraja.save()
+            carta.delete()
+
+        return HttpResponseRedirect(reverse_lazy('pam:LBaraja'))
+        
+   
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+        try:
+            return Baraja.objects.get(id=self.request.GET.get("q")).usuario == self.request.user
+        except:
+            return False
+
+class ListadoBaraja(UserPassesTestMixin,TemplateView):
+    template_name="Barajas/listar.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["object_list"] = Baraja.objects.filter(usuario=self.request.user)
+        return context
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+        try:
+            return self.request.user.is_authenticated
+        except:
+            return False
+class DeleteBaraja(UserPassesTestMixin,DeleteView):
+    template_name = "CRUD/eliminar.html"
+    model = Baraja
+    success_url = reverse_lazy("pam:LBaraja")
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+        try:
+            return Baraja.objects.get(id=self.request.META["PATH_INFO"].split("/")[-1]).usuario == self.request.user
+        except:
+            return False
 #DELETE VIEWS
-class DeletePokemon(DeleteView):
+class DeletePokemon(UserPassesTestMixin,DeleteView):
     template_name = "CRUD/eliminar.html"
     model = Pokemon
     success_url = reverse_lazy("pam:Cartas")
-
-class DeleteAtaque(DeleteView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class DeleteAtaque(UserPassesTestMixin,DeleteView):
     template_name = "CRUD/eliminar.html"
     model = Ataque
     success_url = reverse_lazy("pam:Cartas")
-
-class DeleteEquipo(DeleteView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class DeleteEquipo(UserPassesTestMixin,DeleteView):
     template_name = "CRUD/eliminar.html"
     model = Equipo
     success_url = reverse_lazy("pam:Cartas")
-
-class DeleteApoyo(DeleteView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class DeleteApoyo(UserPassesTestMixin,DeleteView):
     template_name = "CRUD/eliminar.html"
     model = Apoyo
     success_url = reverse_lazy("pam:Cartas")
-
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
 #LIST VIEWS
 class ListadoPokemon(TemplateView):
     template_name="CRUD/listar.html"
@@ -250,60 +374,62 @@ class ListadoApoyo(TemplateView):
         context["object_list"] = Apoyo.objects.all()
         return context
 
-class ListadoBaraja(TemplateView):
-    template_name="Barajas/listar.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["object_list"] = Baraja.objects.filter(Usuario=self.request.user)
-        return context
 
-class DetailBaraja(DetailView):
-    model = Baraja
-    template_name = "Barajas/DetailBaraja.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["registros"] = Registro.objects.filter(Baraja=Baraja.objects.get(id=self.request.META["PATH_INFO"].split("/")[-1]))
-        return context
-    
+
 #UPDATE VIEWS
 
-class UpdatePokemon(UpdateView):
+class UpdatePokemon(UserPassesTestMixin,UpdateView):
     template_name = 'CRUD/crear.html'
     model = Pokemon
     fields = '__all__'
-
-class UpdateEquipo(UpdateView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class UpdateEquipo(UserPassesTestMixin,UpdateView):
     template_name = 'CRUD/crear.html'
     model = Equipo
     fields = '__all__'
-
-class UpdateAtaque(UpdateView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class UpdateAtaque(UserPassesTestMixin,UpdateView):
     template_name = 'CRUD/crear.html'
     model = Ataque
     fields = '__all__'
-
-class UpdateApoyo(UpdateView):
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
+class UpdateApoyo(UserPassesTestMixin,UpdateView):
     template_name = 'CRUD/crear.html'
     model = Apoyo
     fields = '__all__'
-
+    def test_func(self): #COMPROBAR SI POSEE PERMISOS (ERROR 403: FORBIDDEN)
+            try:
+                return self.request.user.is_superuser
+            except:
+                return False
 
 #DETAIL
 
 class DetailPokemon(DetailView):
-    template_name = 'details/pokemon.html'
+    template_name = 'Detail/detailcarta.html'
     queryset=Pokemon.objects.all()
 
 class DetailAtaque(DetailView):
-    template_name = 'details/ataque.html'
+    template_name = 'Detail/detailataque.html'
     queryset=Ataque.objects.all()
 
 class DetailEquipo(DetailView):
-    template_name = 'details/equipo.html'
+    template_name = 'Detail/detailequipo.html'
     queryset=Equipo.objects.all()
 
 class DetailApoyo(DetailView):
-    template_name = 'details/apoyo.html'
+    template_name = 'Detail/detailapoyo.html'
     queryset=Apoyo.objects.all()

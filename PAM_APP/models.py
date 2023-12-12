@@ -13,10 +13,11 @@ class Usuario(AbstractUser):
     apellido = models.CharField(max_length=160)
     #Avatar = models.ImageField(blank=True, null=True)
 
-    
+    def get_absolute_url(self):
+         return reverse('pam:Index')
 
     def __str__(self):
-        return self.Alias
+        return self.alias
 
 class Carta(models.Model):
     nombre =  models.CharField(max_length=150)

@@ -9,7 +9,7 @@ from django.forms.formsets import BaseFormSet
 class SingUpForm(UserCreationForm):
     class Meta:
       model = Usuario
-      fields = ('username', 'password1', 'password2','email','Alias','Nombre','Apellido')
+      fields = ('username', 'password1', 'password2','email','alias','nombre','apellido')
 
 
 # forms.py

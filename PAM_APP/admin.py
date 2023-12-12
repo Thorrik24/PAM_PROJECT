@@ -9,5 +9,5 @@ admin.site.register(Registro)
 admin.site.register(Pokemon)
 admin.site.register(Ataque)
 admin.site.register(Equipo)
-admin.site.register(Hechizo)
+admin.site.register(Apoyo)
 # Register your models here.
